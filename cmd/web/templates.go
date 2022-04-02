@@ -1,6 +1,7 @@
 package main
 
 import (
+	"alexedwards.net/snippetbox/pkg/forms"
 	"alexedwards.net/snippetbox/pkg/models"
 	"html/template" // New import
 	"path/filepath"
@@ -15,6 +16,7 @@ type templateData struct {
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
 	CurrentYear int
+	Form        *forms.Form
 }
 
 // Create a humanDate function which returns a nicely formatted string
