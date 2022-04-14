@@ -11,8 +11,8 @@ import (
 // (to hold the form data) and an Errors field to hold any validation errors
 // for the form data.
 type Form struct {
-	url.Values
-	Errors errors
+	url.Values //embedded struct
+	Errors     errors
 }
 
 // Define a New function to initialize a custom Form struct. Notice that
@@ -20,7 +20,7 @@ type Form struct {
 func New(data url.Values) *Form {
 	return &Form{
 		data,
-		errors(map[string][]string{}),
+		map[string][]string{},
 	}
 }
 
@@ -29,7 +29,8 @@ func New(data url.Values) *Form {
 // appropriate message to the form errors.
 func (f *Form) Required(fields ...string) {
 	for _, field := range fields {
-		value := f.Get(field)
+
+		value := f.Values.Get(field)
 		if strings.TrimSpace(value) == "" {
 			f.Errors.Add(field, "This field cannot be blank")
 		}
@@ -40,7 +41,7 @@ func (f *Form) Required(fields ...string) {
 // contains a maximum number of characters. If the check fails then add the
 // appropriate message to the form errors.
 func (f *Form) MaxLength(field string, d int) {
-	value := f.Get(field)
+	value := f.Values.Get(field)
 	if value == "" {
 		return
 	}

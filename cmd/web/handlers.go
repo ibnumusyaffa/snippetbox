@@ -1,12 +1,13 @@
 package main
 
 import (
-	"alexedwards.net/snippetbox/pkg/forms"
-	"alexedwards.net/snippetbox/pkg/models"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"alexedwards.net/snippetbox/pkg/forms"
+	"alexedwards.net/snippetbox/pkg/models"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -77,7 +78,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-
+	app.session.Put(r, "flash", "Snippet successfully created!")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }
 
@@ -86,4 +87,26 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 		// Pass a new empty forms.Form object to the template.
 		Form: forms.New(nil),
 	})
+}
+
+func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "signup.page.tmpl", &templateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Create a new user...")
+}
+
+func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Display the user login form...")
+}
+
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate and login the user...")
+}
+
+func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Logout the user...")
 }

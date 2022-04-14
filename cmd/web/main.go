@@ -1,14 +1,18 @@
 package main
 
 import (
-	"alexedwards.net/snippetbox/pkg/models/mysql"
+	"crypto/tls"
 	"database/sql"
 	"flag"
-	_ "github.com/go-sql-driver/mysql" // New import
-	"html/template"                    // New import
+	"html/template" // New import
 	"log"
 	"net/http"
 	"os" // New import
+	"time"
+
+	"alexedwards.net/snippetbox/pkg/models/mysql"
+	_ "github.com/go-sql-driver/mysql" // New import
+	"github.com/golangcollege/sessions"
 )
 
 // Define an application struct to hold the application-wide dependencies for the
@@ -18,12 +22,16 @@ type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
 	snippets      *mysql.SnippetModel
+	session       *sessions.Session
 	templateCache map[string]*template.Template
+	users         *mysql.UserModel
 }
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	dsn := flag.String("dsn", "root:password@tcp(localhost:3305)/snippetbox?parseTime=true", "MySQL data source name")
+	secret := flag.String("secret", "s6Ndh+pPbnzHbS*+9Pk8qGWhTzbpa@ge", "Secret key")
+
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -44,21 +52,36 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
+		session:       session,
 		snippets:      &mysql.SnippetModel{DB: db},
 		templateCache: templateCache,
+		users:         &mysql.UserModel{DB: db},
+	}
+
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(), // Call the new app.routes() method
+		Addr:      *addr,
+		ErrorLog:  errorLog,
+		Handler:   app.routes(), // Call the new app.routes() method
+		TLSConfig: tlsConfig,
+
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
-	err = srv.ListenAndServe()
+
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 
