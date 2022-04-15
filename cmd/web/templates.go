@@ -1,11 +1,12 @@
 package main
 
 import (
-	"alexedwards.net/snippetbox/pkg/forms"
-	"alexedwards.net/snippetbox/pkg/models"
 	"html/template" // New import
 	"path/filepath"
 	"time"
+
+	"alexedwards.net/snippetbox/pkg/forms"
+	"alexedwards.net/snippetbox/pkg/models"
 )
 
 // Define a templateData type to act as the holding structure for
@@ -13,11 +14,12 @@ import (
 // At the moment it only contains one field, but we'll add more
 // to it as the build progresses.
 type templateData struct {
-	Flash       string
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	CurrentYear int
-	Form        *forms.Form
+	Flash           string
+	Snippet         *models.Snippet
+	Snippets        []*models.Snippet
+	CurrentYear     int
+	Form            *forms.Form
+	IsAuthenticated bool
 }
 
 // Create a humanDate function which returns a nicely formatted string
