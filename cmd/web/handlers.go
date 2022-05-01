@@ -10,6 +10,10 @@ import (
 	"alexedwards.net/snippetbox/pkg/models"
 )
 
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Because Pat matches the "/" path exactly, we can now remove the manual check
 	// of r.URL.Path != "/" from this handler.
